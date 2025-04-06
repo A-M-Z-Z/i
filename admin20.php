@@ -277,10 +277,23 @@ function format_file_size($bytes) {
             white-space: nowrap;
         }
 
-        /* Optionnel - Si vous voulez vraiment des boutons minimaux avec icônes uniquement */
+        /* Buttons with responsive text */
         td .btn-group .btn {
             padding-left: 0.4rem;
             padding-right: 0.4rem;
+        }
+        
+        /* Hide text on small screens, show only on medium and larger */
+        @media (max-width: 767.98px) {
+            .d-md-inline {
+                display: none !important;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .d-md-inline {
+                display: inline !important;
+            }
         }
     </style>
 </head>
@@ -399,12 +412,14 @@ function format_file_size($bytes) {
                                       ($user['is_admin'] == 1 ? 'Admin' : 'User') . "</span></td>";
                                 echo "<td>
                                     <div class='btn-group btn-group-sm'>
-                                        <a href='?toggle_admin={$user['id']}' class='btn btn-sm btn-secondary'>
+                                        <a href='?toggle_admin={$user['id']}' class='btn btn-sm btn-secondary d-flex align-items-center'>
                                             <i class='fas " . ($user['is_admin'] == 1 ? "fa-user" : "fa-crown") . "'></i>
+                                            <span class='d-none d-md-inline ms-1'>" . ($user['is_admin'] == 1 ? 'Remove Admin' : 'Make Admin') . "</span>
                                         </a>
-                                        <a href='?delete_user={$user['id']}' class='btn btn-sm btn-danger' 
+                                        <a href='?delete_user={$user['id']}' class='btn btn-sm btn-danger d-flex align-items-center' 
                                            onclick='return confirm(\"Are you sure you want to delete this user? All their files will be deleted as well.\");'>
                                             <i class='fas fa-trash'></i>
+                                            <span class='d-none d-md-inline ms-1'>Delete</span>
                                         </a>
                                     </div>
                                 </td>";
