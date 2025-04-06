@@ -86,23 +86,6 @@ if (isset($_POST['update_quota']) && isset($_POST['user_id']) && isset($_POST['q
     }
 }
 
-// Handle file deletion
-if (isset($_GET['delete_file']) && is_numeric($_GET['delete_file']) && isset($_GET['view_files']) && is_numeric($_GET['view_files'])) {
-    $file_id = intval($_GET['delete_file']);
-    $view_user_id = intval($_GET['view_files']);
-    
-    $deleteFileStmt = $conn->prepare("DELETE FROM files WHERE id = ?");
-    $deleteFileStmt->bind_param("i", $file_id);
-    if ($deleteFileStmt->execute()) {
-        $messages[] = "<div class='alert alert-success'>File deleted successfully.</div>";
-    } else {
-        $messages[] = "<div class='alert alert-danger'>Error deleting file.</div>";
-    }
-}
-
-// Handle viewing user files
-$view_user_id = isset($_GET['view_files']) && is_numeric($_GET['view_files']) ? intval($_GET['view_files']) : null;
-
 // Fetch system statistics
 $userCount = $conn->query("SELECT COUNT(*) FROM users")->fetch_row()[0];
 $fileCount = $conn->query("SELECT COUNT(*) FROM files")->fetch_row()[0];
@@ -277,28 +260,28 @@ function format_file_size($bytes) {
             }
         }
         /* Boutons plus petits pour la section Admin */
-.btn-group-sm > .btn, .btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    line-height: 1.5;
-    border-radius: 0.2rem;
-}
+        .btn-group-sm > .btn, .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            border-radius: 0.2rem;
+        }
 
-/* Retirer l'espace pour les boutons avec icônes seulement */
-.btn-sm i {
-    margin-right: 0;
-}
+        /* Retirer l'espace pour les boutons avec icônes seulement */
+        .btn-sm i {
+            margin-right: 0;
+        }
 
-/* Optionnel - Réduire la largeur des boutons actions */
-td .btn-group {
-    white-space: nowrap;
-}
+        /* Optionnel - Réduire la largeur des boutons actions */
+        td .btn-group {
+            white-space: nowrap;
+        }
 
-/* Optionnel - Si vous voulez vraiment des boutons minimaux avec icônes uniquement */
-td .btn-group .btn {
-    padding-left: 0.4rem;
-    padding-right: 0.4rem;
-}
+        /* Optionnel - Si vous voulez vraiment des boutons minimaux avec icônes uniquement */
+        td .btn-group .btn {
+            padding-left: 0.4rem;
+            padding-right: 0.4rem;
+        }
     </style>
 </head>
 <body>
@@ -306,6 +289,7 @@ td .btn-group .btn {
         <div class="logo">
             <img src="logo.png" alt="CloudBOX Logo" height="40">
         </div>
+        <h1>CloudBOX</h1>
         <div class="search-bar">
             <input type="text" placeholder="Search files and folders..." class="form-control">
         </div>
@@ -334,139 +318,131 @@ td .btn-group .btn {
             <?= $message ?>
         <?php endforeach; ?>
         
-
-
-        <?php else: ?>
-            <!-- System Stats Section -->
-            <div class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-title">TOTAL USERS</div>
-                    <div class="stat-value"><?= $userCount ?></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">TOTAL FILES</div>
-                    <div class="stat-value"><?= $fileCount ?></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">STORAGE USED</div>
-                    <div class="stat-value"><?= number_format($totalStorage / (1024 * 1024), 2) ?> MB</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">ADMINS</div>
-                    <div class="stat-value"><?= $adminCount ?></div>
-                </div>
+        <!-- System Stats Section -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-title">TOTAL USERS</div>
+                <div class="stat-value"><?= $userCount ?></div>
             </div>
-            
-            <!-- User Management Section -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>User Management</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Username</th>
-                                    <th>Email</th>
-                                    <th>Full Name</th>
-                                    <th>Storage Used</th>
-                                    <th>Storage Quota</th>
-                                    <th>Admin Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $result = $conn->query("SELECT u.id, u.username, u.email, u.full_name, u.is_admin, u.storage_quota, 
-                                                      (SELECT SUM(file_size) FROM files WHERE user_id = u.id) as storage 
-                                                      FROM users u ORDER BY u.id");
+            <div class="stat-card">
+                <div class="stat-title">TOTAL FILES</div>
+                <div class="stat-value"><?= $fileCount ?></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">STORAGE USED</div>
+                <div class="stat-value"><?= number_format($totalStorage / (1024 * 1024), 2) ?> MB</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">ADMINS</div>
+                <div class="stat-value"><?= $adminCount ?></div>
+            </div>
+        </div>
+        
+        <!-- User Management Section -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users me-2"></i>User Management</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Full Name</th>
+                                <th>Storage Used</th>
+                                <th>Storage Quota</th>
+                                <th>Admin Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $result = $conn->query("SELECT u.id, u.username, u.email, u.full_name, u.is_admin, u.storage_quota, 
+                                                  (SELECT SUM(file_size) FROM files WHERE user_id = u.id) as storage 
+                                                  FROM users u ORDER BY u.id");
+                            
+                            while ($user = $result->fetch_assoc()) {
+                                $storageInMB = number_format(($user['storage'] ?? 0) / (1024 * 1024), 2);
+                                $quotaInMB = number_format(($user['storage_quota'] ?? 104857600) / (1024 * 1024), 0);
                                 
-                                while ($user = $result->fetch_assoc()) {
-                                    $storageInMB = number_format(($user['storage'] ?? 0) / (1024 * 1024), 2);
-                                    $quotaInMB = number_format(($user['storage_quota'] ?? 104857600) / (1024 * 1024), 0);
-                                    
-                                    // Calculate usage percentage for progress bar
-                                    $usagePercent = ($user['storage'] && $user['storage_quota']) 
-                                        ? min(100, round(($user['storage'] / $user['storage_quota']) * 100)) 
-                                        : 0;
-                                    
-                                    $barColor = $usagePercent > 90 ? '#ef4444' : ($usagePercent > 70 ? '#f59e0b' : '#22c55e');
-                                    
-                                    echo "<tr>";
-                                    echo "<td>" . $user['id'] . "</td>";
-                                    echo "<td>" . htmlspecialchars($user['username']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($user['email']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($user['full_name']) . "</td>";
-                                    echo "<td>
-                                          <div class='progress mb-2'>
-                                            <div class='progress-bar' role='progressbar' style='width: {$usagePercent}%; background-color: {$barColor};'></div>
-                                          </div>
-                                          {$storageInMB} MB ({$usagePercent}%)
-                                        </td>";
-                                    echo "<td>
-                                          <form method='post' class='d-flex'>
-                                            <input type='hidden' name='user_id' value='{$user['id']}'>
-                                            <div class='input-group input-group-sm'>
-                                              <input type='number' name='quota_mb' value='{$quotaInMB}' min='10' max='10240' class='form-control'>
-                                              <button type='submit' name='update_quota' class='btn btn-primary'>Confirm</button>
-                                            </div>
-                                          </form>
-                                        </td>";
-                                    echo "<td><span class='badge " . ($user['is_admin'] == 1 ? "bg-primary" : "bg-secondary") . "'>" . 
-                                          ($user['is_admin'] == 1 ? 'Admin' : 'User') . "</span></td>";
-                                    echo "<td>
-                                        <div class='btn-group btn-group-sm'>
-                                            <a href='?view_files={$user['id']}' class='btn btn-primary'>
-                                                <i class='fas fa-folder-open me-1'></i> View Files
-                                            </a>
-                                            <a href='?toggle_admin={$user['id']}' class='btn btn-secondary'>
-                                                <i class='fas " . ($user['is_admin'] == 1 ? "fa-user" : "fa-crown") . " me-1'></i> " . 
-                                                ($user['is_admin'] == 1 ? 'Remove Admin' : 'Make Admin') . "
-                                            </a>
-                                            <a href='?delete_user={$user['id']}' class='btn btn-danger' 
-                                               onclick='return confirm(\"Are you sure you want to delete this user? All their files will be deleted as well.\");'>
-                                                <i class='fas fa-trash me-1'></i> Delete
-                                            </a>
-                                        </div>
+                                // Calculate usage percentage for progress bar
+                                $usagePercent = ($user['storage'] && $user['storage_quota']) 
+                                    ? min(100, round(($user['storage'] / $user['storage_quota']) * 100)) 
+                                    : 0;
+                                
+                                $barColor = $usagePercent > 90 ? '#ef4444' : ($usagePercent > 70 ? '#f59e0b' : '#22c55e');
+                                
+                                echo "<tr>";
+                                echo "<td>" . $user['id'] . "</td>";
+                                echo "<td>" . htmlspecialchars($user['username']) . "</td>";
+                                echo "<td>" . htmlspecialchars($user['email']) . "</td>";
+                                echo "<td>" . htmlspecialchars($user['full_name']) . "</td>";
+                                echo "<td>
+                                      <div class='progress mb-2'>
+                                        <div class='progress-bar' role='progressbar' style='width: {$usagePercent}%; background-color: {$barColor};'></div>
+                                      </div>
+                                      {$storageInMB} MB ({$usagePercent}%)
                                     </td>";
-                                    echo "</tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
+                                echo "<td>
+                                      <form method='post' class='d-flex'>
+                                        <input type='hidden' name='user_id' value='{$user['id']}'>
+                                        <div class='input-group input-group-sm'>
+                                          <input type='number' name='quota_mb' value='{$quotaInMB}' min='10' max='10240' class='form-control'>
+                                          <button type='submit' name='update_quota' class='btn btn-primary'>Confirm</button>
+                                        </div>
+                                      </form>
+                                    </td>";
+                                echo "<td><span class='badge " . ($user['is_admin'] == 1 ? "bg-primary" : "bg-secondary") . "'>" . 
+                                      ($user['is_admin'] == 1 ? 'Admin' : 'User') . "</span></td>";
+                                echo "<td>
+                                    <div class='btn-group btn-group-sm'>
+                                        <a href='?toggle_admin={$user['id']}' class='btn btn-sm btn-secondary'>
+                                            <i class='fas " . ($user['is_admin'] == 1 ? "fa-user" : "fa-crown") . "'></i>
+                                        </a>
+                                        <a href='?delete_user={$user['id']}' class='btn btn-sm btn-danger' 
+                                           onclick='return confirm(\"Are you sure you want to delete this user? All their files will be deleted as well.\");'>
+                                            <i class='fas fa-trash'></i>
+                                        </a>
+                                    </div>
+                                </td>";
+                                echo "</tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            
-            <!-- System Logs Section -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent System Activity</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted">This section displays recent login attempts, file uploads, and other system activities.</p>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>User</th>
-                                    <th>Action</th>
-                                    <th>Details</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="4" class="text-center">Logging system not implemented yet. This feature will be available soon.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+        </div>
+        
+        <!-- System Logs Section -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent System Activity</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">This section displays recent login attempts, file uploads, and other system activities.</p>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" class="text-center">Logging system not implemented yet. This feature will be available soon.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        <?php endif; ?>
+        </div>
     </main>
 
     <!-- Bootstrap Bundle with Popper -->
