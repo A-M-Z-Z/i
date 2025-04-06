@@ -3,7 +3,7 @@ session_start(); // Start session
 
 // Check if user is logged in and is an admin
 if (!isset($_SESSION['username']) || !isset($_SESSION['user_id']) || !isset($_SESSION['is_admin']) || $_SESSION['is_admin'] != 1) {
-    header("Location: expired");  // Redirect to expired page if not admin
+    header("Location: expired.php");  // Redirect to expired page if not admin
     exit();
 }
 
@@ -176,6 +176,7 @@ function format_file_size($bytes) {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
+            justify-content:center;
         }
         
         .dashboard-nav a {
@@ -275,6 +276,29 @@ function format_file_size($bytes) {
                 width: 150px;
             }
         }
+        /* Boutons plus petits pour la section Admin */
+.btn-group-sm > .btn, .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
+
+/* Retirer l'espace pour les boutons avec icônes seulement */
+.btn-sm i {
+    margin-right: 0;
+}
+
+/* Optionnel - Réduire la largeur des boutons actions */
+td .btn-group {
+    white-space: nowrap;
+}
+
+/* Optionnel - Si vous voulez vraiment des boutons minimaux avec icônes uniquement */
+td .btn-group .btn {
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+}
     </style>
 </head>
 <body>
@@ -282,21 +306,19 @@ function format_file_size($bytes) {
         <div class="logo">
             <img src="logo.png" alt="CloudBOX Logo" height="40">
         </div>
-        <h1>CloudBOX</h1>
         <div class="search-bar">
             <input type="text" placeholder="Search files and folders..." class="form-control">
         </div>
     </div>
     
     <nav class="dashboard-nav">
-        <a href="home"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-        <a href="drive"><i class="fas fa-folder"></i> My Drive</a>
+        <a href="home.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <?php if(isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1): ?>
-        <a href="admin"><i class="fas fa-crown"></i> Admin Panel</a>
+        <a href="admin.php"><i class="fas fa-crown"></i> Admin Panel</a>
         <?php endif; ?>
-        <a href="shared"><i class="fas fa-share-alt"></i> Shared Files</a>
-        <a href="monitoring"><i class="fas fa-chart-line"></i> Monitoring</a>
-        <a href="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <a href="shared.php"><i class="fas fa-share-alt"></i> Shared Files</a>
+        <a href="monitoring.php"><i class="fas fa-chart-line"></i> Monitoring</a>
+        <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </nav>
 
     <main>
@@ -312,74 +334,8 @@ function format_file_size($bytes) {
             <?= $message ?>
         <?php endforeach; ?>
         
-        <?php if ($view_user_id): ?>
-            <!-- View User Files Section -->
-            <a href="admin" class="btn btn-secondary mb-4">
-                <i class="fas fa-arrow-left me-2"></i> Back to Admin Dashboard
-            </a>
-            <?php
-            $userStmt = $conn->prepare("SELECT username FROM users WHERE id = ?");
-            $userStmt->bind_param("i", $view_user_id);
-            $userStmt->execute();
-            $userStmt->bind_result($user_username);
-            $userStmt->fetch();
-            $userStmt->close();
-            ?>
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-file me-2"></i>Files for User: <?= htmlspecialchars($user_username) ?></h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>File ID</th>
-                                    <th>Filename</th>
-                                    <th>Size</th>
-                                    <th>Type</th>
-                                    <th>Upload Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $filesStmt = $conn->prepare("SELECT id, filename, file_size, file_type, created_at FROM files WHERE user_id = ?");
-                                $filesStmt->bind_param("i", $view_user_id);
-                                $filesStmt->execute();
-                                $result = $filesStmt->get_result();
-                                
-                                if ($result->num_rows > 0) {
-                                    while ($file = $result->fetch_assoc()) {
-                                        $fileSize = format_file_size($file['file_size']);
-                                        echo "<tr>";
-                                        echo "<td>" . $file['id'] . "</td>";
-                                        echo "<td>" . htmlspecialchars($file['filename']) . "</td>";
-                                        echo "<td>" . $fileSize . "</td>";
-                                        echo "<td>" . htmlspecialchars($file['file_type']) . "</td>";
-                                        echo "<td>" . ($file['created_at'] ?? 'N/A') . "</td>";
-                                        echo "<td>
-                                            <div class='btn-group btn-group-sm'>
-                                                <a href='download.php?id={$file['id']}&admin={$userid}' class='btn btn-primary'>
-                                                    <i class='fas fa-download me-1'></i> Download
-                                                </a>
-                                                <a href='?delete_file={$file['id']}&view_files={$view_user_id}' class='btn btn-danger' 
-                                                   onclick='return confirm(\"Are you sure you want to delete this file?\");'>
-                                                    <i class='fas fa-trash me-1'></i> Delete
-                                                </a>
-                                            </div>
-                                        </td>";
-                                        echo "</tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='6' class='text-center'>No files found for this user</td></tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+
+
         <?php else: ?>
             <!-- System Stats Section -->
             <div class="stats-container">
@@ -454,7 +410,7 @@ function format_file_size($bytes) {
                                             <input type='hidden' name='user_id' value='{$user['id']}'>
                                             <div class='input-group input-group-sm'>
                                               <input type='number' name='quota_mb' value='{$quotaInMB}' min='10' max='10240' class='form-control'>
-                                              <button type='submit' name='update_quota' class='btn btn-primary'>MB</button>
+                                              <button type='submit' name='update_quota' class='btn btn-primary'>Confirm</button>
                                             </div>
                                           </form>
                                         </td>";
