@@ -8,10 +8,10 @@ if (!isset($_SESSION['username']) || !isset($_SESSION['user_id']) || !isset($_SE
 }
 
 // Database Connection
-$host = '91.216.107.164';
-$user = 'amzz2427862';
-$pass = '37qB5xqen4prX8@';
-$dbname = 'amzz2427862';
+$host = 'localhost';
+$user = 'root';
+$pass = 'root';
+$dbname = 'cloudbox';
 $conn = new mysqli($host, $user, $pass, $dbname);
 if ($conn->connect_error) die("Database connection failed: " . $conn->connect_error);
 $conn->options(MYSQLI_OPT_CONNECT_TIMEOUT, 60);
@@ -108,34 +108,25 @@ $result = $conn->query("SELECT u.id, u.username, u.email, u.full_name, u.is_admi
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Top Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="logo.png" alt="CloudBOX Logo" height="30" class="d-inline-block align-text-top me-2">
-                CloudBOX
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link" href="home.php"><i class="fas fa-tachometer-alt me-1"></i> Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="drive.php"><i class="fas fa-folder me-1"></i> My Drive</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="admin.php"><i class="fas fa-crown me-1"></i> Admin Panel</a>
-                    </li>
-                </ul>
-                <form class="d-flex">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <a href="logout.php" class="btn btn-outline-light"><i class="fas fa-sign-out-alt me-1"></i> Logout</a>
-                </form>
-            </div>
+     <div class="top-bar">
+        <div class="logo">
+            <img src="logo.png" alt="CloudBOX Logo" height="40">
         </div>
+        <h1>CloudBOX</h1>
+        <div class="search-bar">
+            <input type="text" placeholder="Search files and folders..." class="form-control">
+        </div>
+    </div>
+    
+    <nav class="dashboard-nav">
+        <a href="home"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="drive"><i class="fas fa-folder"></i> My Drive</a>
+        <?php if(isset($_SESSION['is_admin']) && $_SESSION['is_admin'] == 1): ?>
+        <a href="admin"><i class="fas fa-crown"></i> Admin Panel</a>
+        <?php endif; ?>
+        <a href="shared"><i class="fas fa-share-alt"></i> Shared Files</a>
+        <a href="monitoring"><i class="fas fa-chart-line"></i> Monitoring</a>
+        <a href="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </nav>
 
     <!-- Main Content -->
